@@ -173,6 +173,7 @@ sub submit_workers_return_meadow_pids {
     }
 
     my @cmd = ('qsub',
+        '-V',   # propagate all ENV variables to the submitted job (off by default)
         '-o' => $submit_stdout_file,
         '-e' => $submit_stderr_file,
         '-N' => $job_array_common_name,
