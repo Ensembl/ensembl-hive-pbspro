@@ -41,7 +41,7 @@ use Bio::EnsEMBL::Hive::Utils ('split_for_bash');
 use base ('Bio::EnsEMBL::Hive::Meadow');
 
 
-our $VERSION = '4.0';       # Semantic version of the Meadow interface:
+our $VERSION = '4.1';       # Semantic version of the Meadow interface:
                             #   change the Major version whenever an incompatible change is introduced,
                             #   change the Minor version whenever the interface is extended, but compatibility is retained.
 
@@ -95,36 +95,96 @@ sub status_of_all_our_workers { # returns an arrayref
 
     foreach my $meadow_user (@$meadow_users_of_interest) {
         my $user_part   = ($meadow_user eq '*') ? '' : "-u $meadow_user";
-        my $cmd = "qstat -wta $user_part 2>/dev/null";  # FIXME: the column width (even in -w mode) is not adjusted to data, so longer columns are trimmed.
-                                                        # This currently affects the 'job_name' column (and by extension damages the rc_name).
-                                                        # (1) One solution would be to parse 'qstat -fta' instead (very verbose).
-                                                        # (2) A better way would be to stop relying on rc_name and user information from this output altogether.
-                                                        #     However this means slight redesign of Meadow/Valley/Beekeeper interface.
+
+        my $cmd = "qstat -atf $user_part";          # Keep an eye on the efficiency of this approach, as we are parsing through much more data.
+                                                    # When the rest of the Meadow drivers are ready to switch to Meadow v5
+                                                    # we can switch over to parsing "qstat -wta" again (see below).
 
 #        warn "PBSPro::status_of_all_our_workers() running cmd:\n\t$cmd\n";
 
-        foreach my $line (`$cmd`) {
-            if($line=~/^\d+(?:\[\d+\])?\.\w+\s/) {  # only filter out the lines that start with a functional jobid (ignore array_names[])
-                my ($worker_pid, $user, $queue, $job_name, $sess_id, $nds, $tsk, $req_mem, $req_time, $status_letter, $elap_time) = split(/\s+/, $line);
+        my %mpid_attrib = ();
+        my ($current_mpid, $index_only, $current_attrib);
 
-                # skip the hive jobs that belong to another pipeline
-                next if (($job_name =~ /Hive-/) and (index($job_name, $jnp) != 0));
+        open(my $qstat_fh, '-|', $cmd);
 
-                my $rc_name = '__unknown_rc_name__';
-                if ($job_name =~ /^\Q$jnp\E(\S+)\-\d+$/) {
-                    $rc_name = $1;
-                }
+        for my $line (<$qstat_fh>) {
+            chomp $line;
 
-                my $status = {
-                    'Q' => 'PEND',
-                    'R' => 'RUN',
-                    'E' => 'RUN',
-                    'X' => 'RUN',
-                    'F' => 'DONE',  # not one of possible -wta states, but is here for completeness
-                }->{$status_letter};
-                push @status_list, [$worker_pid, $user, $status, $rc_name];
+            if($line=~/^Job Id: (\w+(\[\d*\])?\.\w+)/) {
+                $current_mpid = $1;
+                $index_only = $2;
+            } elsif($line=~/^\ {4}(\w+) = (.*)$/) {
+                $current_attrib = $1;
+                $mpid_attrib{$current_mpid}{$current_attrib} = $2;
+            } elsif($line=~/^\t(.*)$/) {
+                $mpid_attrib{$current_mpid}{$current_attrib} .= $1;
             }
         }
+        close $qstat_fh;
+
+            # remove the arrayjob "headers":
+        my @array_header_mpids = grep /^\w+\[\]\.\w+$/, keys %mpid_attrib;
+        delete @mpid_attrib{@array_header_mpids};       # cutting out a slice
+
+        while(my ($worker_mpid, $attrib) = each %mpid_attrib) {
+            my ($job_name, $user, $status_letter) = ($attrib->{'Job_Name'}, $attrib->{'Job_Owner'}, $attrib->{'job_state'});
+
+                # skip the hive jobs that belong to another pipeline:
+            next if (($job_name =~ /Hive-/) and (index($job_name, $jnp) != 0));
+
+            my $rc_name = '__unknown_rc_name__';
+            if ($job_name =~ /^\Q$jnp\E(\S+)\-\d+$/) {
+                $rc_name = $1;
+            }
+
+            $user=~s/\@.*$//;    # trim off the hostname
+
+            my $status = {
+                'Q' => 'PEND',
+                'R' => 'RUN',
+                'E' => 'RUN',
+                'X' => 'RUN',
+                'F' => 'DONE',  # not one of possible -wta states, but is here for completeness
+            }->{$status_letter};
+
+            push @status_list, [$worker_mpid, $user, $status, $rc_name];
+        }
+
+
+####### This is a faster version with less output to parse, but it suffers from the 15-character limit for $job_name column.
+####### Once switching to Meadow v.5 is done (and rc_name is no longer expected to be parsed at this stage) you can revert to the short version.
+#
+#        my $cmd = "qstat -wta $user_part 2>/dev/null";  # FIXME: the column width (even in -w mode) is not adjusted to data, so longer columns are trimmed.
+#                                                        # This currently affects the 'job_name' column (and by extension damages the rc_name).
+#                                                        # (1) One solution would be to parse 'qstat -fta' instead (very verbose).
+#                                                        # (2) A better way would be to stop relying on rc_name and user information from this output altogether.
+#                                                        #     However this means slight redesign of Meadow/Valley/Beekeeper interface.
+#
+##        warn "PBSPro::status_of_all_our_workers() running cmd:\n\t$cmd\n";
+#
+#        foreach my $line (`$cmd`) {
+#            if($line=~/^\d+(?:\[\d+\])?\.\w+\s/) {  # only filter out the lines that start with a functional jobid (ignore array_names[])
+#                my ($worker_pid, $user, $queue, $job_name, $sess_id, $nds, $tsk, $req_mem, $req_time, $status_letter, $elap_time) = split(/\s+/, $line);
+#
+#                # skip the hive jobs that belong to another pipeline
+#                next if (($job_name =~ /Hive-/) and (index($job_name, $jnp) != 0));
+#
+#                my $rc_name = '__unknown_rc_name__';
+#                if ($job_name =~ /^\Q$jnp\E(\S+)\-\d+$/) {
+#                    $rc_name = $1;
+#                }
+#
+#                my $status = {
+#                    'Q' => 'PEND',
+#                    'R' => 'RUN',
+#                    'E' => 'RUN',
+#                    'X' => 'RUN',
+#                    'F' => 'DONE',  # not one of possible -wta states, but is here for completeness
+#                }->{$status_letter};
+#                push @status_list, [$worker_pid, $user, $status, $rc_name];
+#            }
+#        }
+
     }
 
     return \@status_list;
