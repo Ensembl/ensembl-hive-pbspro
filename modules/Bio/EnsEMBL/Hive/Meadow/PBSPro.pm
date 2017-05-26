@@ -41,7 +41,7 @@ use Bio::EnsEMBL::Hive::Utils ('split_for_bash');
 use base ('Bio::EnsEMBL::Hive::Meadow');
 
 
-our $VERSION = '4.1';       # Semantic version of the Meadow interface:
+our $VERSION = '4.1.1';     # Semantic version of the Meadow interface:
                             #   change the Major version whenever an incompatible change is introduced,
                             #   change the Minor version whenever the interface is extended, but compatibility is retained.
 
@@ -96,7 +96,7 @@ sub status_of_all_our_workers { # returns an arrayref
     foreach my $meadow_user (@$meadow_users_of_interest) {
         my $user_part   = ($meadow_user eq '*') ? '' : "-u $meadow_user";
 
-        my $cmd = "qstat -atf $user_part";          # Keep an eye on the efficiency of this approach, as we are parsing through much more data.
+        my $cmd = "qstat -xtf $user_part";          # Keep an eye on the efficiency of this approach, as we are parsing through much more data.
                                                     # When the rest of the Meadow drivers are ready to switch to Meadow v5
                                                     # we can switch over to parsing "qstat -wta" again (see below).
 
@@ -142,12 +142,14 @@ sub status_of_all_our_workers { # returns an arrayref
             my $status = {
                 'Q' => 'PEND',
                 'R' => 'RUN',
-                'E' => 'RUN',
-                'X' => 'RUN',
-                'F' => 'DONE',  # not one of possible -wta states, but is here for completeness
+                'E' => 'RUN',   # 'Exiting', some intermediate state between 'R' and 'X/F'
+                'X' => 'RUN',   # 'eXiting', an array-element specific state
+                'F' => 'DONE',  # 'Finished'
             }->{$status_letter};
 
-            push @status_list, [$worker_mpid, $user, $status, $rc_name];
+            unless($status eq 'DONE') {
+                push @status_list, [$worker_mpid, $user, $status, $rc_name];
+            }
         }
 
 
