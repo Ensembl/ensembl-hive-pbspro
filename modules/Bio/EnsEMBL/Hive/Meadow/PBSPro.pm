@@ -41,7 +41,7 @@ use Bio::EnsEMBL::Hive::Utils ('split_for_bash');
 use base ('Bio::EnsEMBL::Hive::Meadow');
 
 
-our $VERSION = '4.1.1';     # Semantic version of the Meadow interface:
+our $VERSION = '5.0';       # Semantic version of the Meadow interface:
                             #   change the Major version whenever an incompatible change is introduced,
                             #   change the Minor version whenever the interface is extended, but compatibility is retained.
 
@@ -132,11 +132,6 @@ sub status_of_all_our_workers { # returns an arrayref
                 # skip the hive jobs that belong to another pipeline:
             next if (($job_name =~ /Hive-/) and (index($job_name, $jnp) != 0));
 
-            my $rc_name = '__unknown_rc_name__';
-            if ($job_name =~ /^\Q$jnp\E(\S+)\-\d+$/) {
-                $rc_name = $1;
-            }
-
             $user=~s/\@.*$//;    # trim off the hostname
 
             my $status = {
@@ -148,7 +143,7 @@ sub status_of_all_our_workers { # returns an arrayref
             }->{$status_letter};
 
             unless($status eq 'DONE') {
-                push @status_list, [$worker_mpid, $user, $status, $rc_name];
+                push @status_list, [$worker_mpid, $user, $status];
             }
         }
 
@@ -171,11 +166,6 @@ sub status_of_all_our_workers { # returns an arrayref
 #                # skip the hive jobs that belong to another pipeline
 #                next if (($job_name =~ /Hive-/) and (index($job_name, $jnp) != 0));
 #
-#                my $rc_name = '__unknown_rc_name__';
-#                if ($job_name =~ /^\Q$jnp\E(\S+)\-\d+$/) {
-#                    $rc_name = $1;
-#                }
-#
 #                my $status = {
 #                    'Q' => 'PEND',
 #                    'R' => 'RUN',
@@ -183,7 +173,7 @@ sub status_of_all_our_workers { # returns an arrayref
 #                    'X' => 'RUN',
 #                    'F' => 'DONE',  # not one of possible -wta states, but is here for completeness
 #                }->{$status_letter};
-#                push @status_list, [$worker_pid, $user, $status, $rc_name];
+#                push @status_list, [$worker_pid, $user, $status];
 #            }
 #        }
 
