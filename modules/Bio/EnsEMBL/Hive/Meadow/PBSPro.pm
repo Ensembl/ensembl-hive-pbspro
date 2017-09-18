@@ -247,7 +247,7 @@ sub submit_workers_return_meadow_pids {
     }
     close $qsub_output_fh;
 
-    if($pbs_jobid) {
+    if(defined $pbs_jobid) {
         return ($pbs_array_detected ? [ map { $pbs_jobid.'['.$_.'].'.$pbs_servername } (1..$required_worker_count) ] : [ $pbs_jobid.'.'.$pbs_servername ]);
     } else {
         die "Submission unsuccessful\n";
