@@ -42,5 +42,5 @@ echo "\$clienthost $(hostname)" > /var/spool/pbs/mom_priv/config
 
 /etc/init.d/pbs start
 
-sudo --login -u pbsuser $PBSPRO_CHECKOUT_LOCATION/travisci/run_tests.sh
+sudo -i -u pbsuser $PBSPRO_CHECKOUT_LOCATION/travisci/run_tests.sh
 
