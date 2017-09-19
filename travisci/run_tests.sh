@@ -15,5 +15,5 @@ export PERL5LIB=$EHIVE_ROOT_DIR/modules:$PWD/modules
 export EHIVE_TEST_PIPELINE_URLS='sqlite:///ehive_test_pipeline_db'
 export EHIVE_MEADOW_TO_TEST=PBSPro
 
-prove -rv --ext .t --ext .mt t "$EHIVE_ROOT_DIR/t/04.meadow/meadow-longmult.mt"
+prove -rv --ext .t --ext .mt "$EHIVE_ROOT_DIR/t/04.meadow/meadow-longmult.mt"
 
