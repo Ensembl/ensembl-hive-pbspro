@@ -35,5 +35,12 @@ chown -R pbsuser: $PBSPRO_CHECKOUT_LOCATION
 cpanm --installdeps --with-recommends $PBSPRO_CHECKOUT_LOCATION/ensembl-hive
 cpanm --installdeps --with-recommends $PBSPRO_CHECKOUT_LOCATION
 
+# Update the config with the container's hostname
+sed -i "s/^PBS_SERVER=.*\$/PBS_SERVER=$(hostname)/" /etc/pbs.conf
+sed -i 's/PBS_START_MOM=0/PBS_START_MOM=1/' /etc/pbs.conf
+echo "\$clienthost $(hostname)" > /var/spool/pbs/mom_priv/config
+
+/etc/init.d/pbs start
+
 sudo --login -u pbsuser $PBSPRO_CHECKOUT_LOCATION/travisci/run_tests.sh
 
