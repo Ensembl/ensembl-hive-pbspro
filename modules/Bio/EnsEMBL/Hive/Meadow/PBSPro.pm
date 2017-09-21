@@ -55,7 +55,7 @@ sub name {  # also called to check for availability; assume PBSPro is available 
     if(my $name = `$cmd`) {         # note that at least in some installations 'qsub' is not directly runnable on execution nodes (maybe just a PATH issue)
         $name=~/^$mcni\s+(\S+)/;
         return $1;
-    } elsif(($ENV{'PBS_JOBID'}//'')=~/^\d+(?:\[\d+\])?\.(\w+)$/) {      # so this is how we check whether we have been submitted under PBSPro
+    } elsif(($ENV{'PBS_JOBID'}//'')=~/^\d+(?:\[\d+\])?\.(\S+)$/) {      # so this is how we check whether we have been submitted under PBSPro
         return $1;
     } else {
         return undef;
@@ -111,7 +111,7 @@ if(0) {     # The -f (full) format potentially gives more information, but gener
         for my $line (<$qstat_fh>) {
             chomp $line;
 
-            if($line=~/^Job Id: (\w+(\[\d*\])?\.\w+)/) {
+            if($line=~/^Job Id: (\w+(\[\d*\])?\.\S+)/) {
                 $current_mpid = $1;
                 $index_only = $2;
             } elsif($line=~/^\ {4}(\w+) = (.*)$/) {
@@ -124,7 +124,7 @@ if(0) {     # The -f (full) format potentially gives more information, but gener
         close $qstat_fh;
 
             # remove the arrayjob "headers":
-        my @array_header_mpids = grep /^\w+\[\]\.\w+$/, keys %mpid_attrib;
+        my @array_header_mpids = grep /^\w+\[\]\.\S+$/, keys %mpid_attrib;
         delete @mpid_attrib{@array_header_mpids};       # cutting out a slice
 
         while(my ($worker_mpid, $attrib) = each %mpid_attrib) {
@@ -155,7 +155,7 @@ if(0) {     # The -f (full) format potentially gives more information, but gener
 #        warn "PBSPro::status_of_all_our_workers() running cmd:\n\t$cmd\n";
 
         foreach my $line (`$cmd`) {
-            if($line=~/^\d+(?:\[\d+\])?\.\w+\s/) {  # only filter out the lines that start with a functional jobid (ignore array_names[])
+            if($line=~/^\d+(?:\[\d+\])?\.\S+\s/) {  # only filter out the lines that start with a functional jobid (ignore array_names[])
                 my ($worker_pid, $user, $queue, $job_name, $sess_id, $nds, $tsk, $req_mem, $req_time, $status_letter, $elap_time) = split(/\s+/, $line);
 
                 my $status = {
@@ -239,7 +239,7 @@ sub submit_workers_return_meadow_pids {
 
     open(my $qsub_output_fh, "-|", @cmd) || die "Could not submit job(s): $!, $?";  # let's abort the beekeeper and let the user check the syntax
     while(my $line = <$qsub_output_fh>) {
-        if($line=~/^(\d+)(\[\])?\.(\w+)\s*$/) {
+        if($line=~/^(\d+)(\[\])?\.(\S+)\s*$/) {
             ($pbs_jobid, $pbs_array_detected, $pbs_servername) = ($1, $2, $3);
         } else {
             warn $line;     # assuming it is a temporary blockage that might resolve itself with time
