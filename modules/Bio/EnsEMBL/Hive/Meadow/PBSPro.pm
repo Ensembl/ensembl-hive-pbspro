@@ -207,7 +207,7 @@ sub submit_workers_return_meadow_pids {
     my ($self, $worker_cmd, $required_worker_count, $iteration, $rc_name, $rc_specific_submission_cmd_args, $submit_log_subdir) = @_;
 
     my $job_array_common_name               = $self->job_array_common_name($rc_name, $iteration);
-    my $index_range                         = ($required_worker_count > 1) ? "1-${required_worker_count}" : '1-2:2';
+    my $index_range                         = ($required_worker_count > 1) ? ['-J', "1-${required_worker_count}"] : [];
     my $meadow_specific_submission_cmd_args = $self->config_get('SubmissionOptions');
 
     my ($submit_stdout_file, $submit_stderr_file);
@@ -227,7 +227,7 @@ sub submit_workers_return_meadow_pids {
         '-o' => $submit_stdout_file,
         '-e' => $submit_stderr_file,
         '-N' => $job_array_common_name,
-        '-J' => $index_range,
+        @$index_range,
         split_for_bash($rc_specific_submission_cmd_args),
         split_for_bash($meadow_specific_submission_cmd_args),
         '--' => split_for_bash($worker_cmd),
