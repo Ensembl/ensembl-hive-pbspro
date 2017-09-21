@@ -40,7 +40,6 @@ ENV EHIVE_TEST_PIPELINE_URLS "sqlite:////home/pbsuser/"
 ENV EHIVE_MEADOW_TO_TEST "PBSPro"
 
 COPY start_pbs_and_login.sh /root/
-RUN chmod +x /root/start_pbs_and_login.sh
 
 # Wrapper that first starts PBS before running the command
 ENTRYPOINT ["/root/start_pbs_and_login.sh"]
