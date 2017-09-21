@@ -4,6 +4,8 @@
 # Cloned and updated version of the official pbspro image
 FROM pbspro/pbspro
 
+RUN yum install -y epel-release sudo
+
 # Proc::Daemon trick: we need version 0.23 but only version 0.19 is in the
 # centos archives. cpanm will fail building 0.23 if 0.19 is around, so we
 # need to build 0.23 before we install anything else
