@@ -91,6 +91,22 @@ sub status_of_all_our_workers { # returns an arrayref
 
     my $jnp = $self->job_name_prefix();
 
+    # We only need to list here possible states of jobs and subjobs
+    # (jobs within an array) not of arrays themselves
+    my $pbs_states = {
+        'Q' => 'PEND',  # Queued -- Job is queued, eligible to run or be routed
+        'W' => 'PEND',  # Job is waiting for its requested execution time to be reached or job specified a stagein request which failed for some reason.
+        'R' => 'RUN',   # Running -- Job is running
+        'E' => 'RUN',   # Ending -- Job is exiting after having run
+        'X' => 'RUN',   # Expired or deleted -- subjob has completed execution or been deleted
+        'F' => 'DONE',  # Finished -- Job is finished. Job has completed execution, job failed during execution, or job was deleted.
+        'H' => 'HSUSP', # Job is held. A job is put into a held state by the server or by a user or administrator. A job stays in a held state until it is released by a user or administrator.
+        'S' => 'SSUSP', # Suspended -- Job is suspended by server. A job is put into the suspended state when a higher priority job needs the resources.
+        'U' => 'USUSP', # Suspended by keyboard activity -- Job is suspended due to workstation becoming busy
+        'T' => 'RUN',   # Job is in transition (being moved to a new location)
+        'M' => 'RUN',   # Job was moved to another server
+    };
+
     my @status_list = ();
 
     foreach my $meadow_user (@$meadow_users_of_interest) {
@@ -135,14 +151,7 @@ if(0) {     # The -f (full) format potentially gives more information, but gener
 
             $user=~s/\@.*$//;    # trim off the hostname
 
-            my $status = {
-                'Q' => 'PEND',
-                'R' => 'RUN',
-                'E' => 'RUN',   # 'Exiting', some intermediate state between 'R' and 'X/F'
-                'X' => 'RUN',   # 'eXiting', an array-element specific state
-                'F' => 'DONE',  # 'Finished'
-            }->{$status_letter};
-
+            my $status = $pbs_states->{$status_letter};
             unless($status eq 'DONE') {
                 push @status_list, [$worker_mpid, $user, $status];
             }
@@ -157,14 +166,7 @@ if(0) {     # The -f (full) format potentially gives more information, but gener
         foreach my $line (`$cmd`) {
             if($line=~/^\d+(?:\[\d+\])?\.\S+\s/) {  # only filter out the lines that start with a functional jobid (ignore array_names[])
                 my ($worker_pid, $user, $queue, $job_name, $sess_id, $nds, $tsk, $req_mem, $req_time, $status_letter, $elap_time) = split(/\s+/, $line);
-
-                my $status = {
-                    'Q' => 'PEND',
-                    'R' => 'RUN',
-                    'E' => 'RUN',
-                    'X' => 'RUN',
-                    'F' => 'DONE',  # not one of possible -wta states, but is here for completeness
-                }->{$status_letter};
+                my $status = $pbs_states->{$status_letter};
                 push @status_list, [$worker_pid, $user, $status];
             }
         }
