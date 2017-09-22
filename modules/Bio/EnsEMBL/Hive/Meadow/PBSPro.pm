@@ -242,7 +242,7 @@ sub submit_workers_return_meadow_pids {
         if($line=~/^(\d+)(\[\])?\.(\S+)\s*$/) {
             ($pbs_jobid, $pbs_array_detected, $pbs_servername) = ($1, $2, $3);
         } else {
-            warn $line;     # assuming it is a temporary blockage that might resolve itself with time
+            warn "Meadow::PBSPro - Submission warning: $line";     # assuming it is a temporary blockage that might resolve itself with time
         }
     }
     close $qsub_output_fh;
