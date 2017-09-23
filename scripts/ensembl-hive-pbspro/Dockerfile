@@ -6,8 +6,8 @@ FROM pbspro/pbspro
 
 # Install essential things
 RUN yum install -y epel-release sudo git \
-    && sed -i "s/^\%wheel\s\+ALL=(ALL)\s\+ALL/%wheel ALL=(ALL) NOPASSWD:ALL/" /etc/sudoers \
-    && useradd -r -m -U -G wheel -d /home/pbsuser -s /bin/bash -c "PBSpro user" pbsuser
+    && useradd -r -m -U -G wheel -d /home/pbsuser -s /bin/bash -c "PBSpro user" pbsuser \
+    && echo "pbsuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Clone the repos
 RUN mkdir /repo \
