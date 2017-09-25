@@ -33,6 +33,8 @@ package Bio::EnsEMBL::Hive::Meadow::PBSPro;
 
 use strict;
 use warnings;
+
+use Cwd qw(cwd);
 use Time::Piece;
 use Time::Seconds;
 
@@ -233,6 +235,7 @@ sub submit_workers_return_meadow_pids {
         split_for_bash($rc_specific_submission_cmd_args),
         split_for_bash($meadow_specific_submission_cmd_args),
         '--' => split_for_bash($worker_cmd),
+        '--cwd' => cwd(),
     );
 
     warn "Executing [ ".$self->signature." ] \t\t".join(' ', @cmd)."\n";
