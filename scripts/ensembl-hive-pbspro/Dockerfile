@@ -24,8 +24,7 @@ ENV PERL5LIB "/repo/ensembl-hive/modules:/repo/ensembl-hive-pbspro/modules:$PERL
 ENV EHIVE_TEST_PIPELINE_URLS "sqlite:////home/pbsuser/"
 ENV EHIVE_MEADOW_TO_TEST "PBSPro"
 
-# Wrapper that first starts PBS before running the command
-ENTRYPOINT ["/repo/ensembl-hive-pbspro/scripts/ensembl-hive-pbspro/start_pbs_and_login.sh"]
-# Default command is a shell
-CMD ["/bin/bash"]
+# Since the environment is set for the root user, but root is not allowed
+# to submit jobs, we need to login as pbsuser and preserve the environment
+CMD ["/bin/login", "-p", "-f", "pbsuser"]
 
