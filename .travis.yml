@@ -9,7 +9,6 @@ services:
 
 install:
     - docker pull ensemblorg/ensembl-hive-pbspro
-    - git clone --depth 1 --branch master https://github.com/Ensembl/ensembl-hive
     - env
 
 script:
