@@ -8,10 +8,10 @@ services:
   - docker
 
 install:
-    - docker pull pbspro/pbspro
+    - docker pull ensemblorg/ensembl-hive-pbspro
     - git clone --depth 1 --branch master https://github.com/Ensembl/ensembl-hive
     - env
 
 script:
-    - docker run -v /home/travis:/home/travis pbspro/pbspro /home/travis/build/Ensembl/ensembl-hive-pbspro/travisci/setup_docker_and_run_tests.sh
+    - docker run -v /home/travis:/home/travis ensemblorg/ensembl-hive-pbspro /home/travis/build/Ensembl/ensembl-hive-pbspro/travisci/setup_docker_and_run_tests.sh
 
