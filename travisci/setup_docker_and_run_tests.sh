@@ -5,11 +5,6 @@ set -e
 
 echo "DEBUG: Environment of $0"; env; id; echo "END_DEBUG"
 
-
-# install PBSpro user
-PBSPROUSER_HOME=/home/pbsuser
-useradd -r -m -U -d $PBSPROUSER_HOME -s /bin/bash -c "PBSpro user" pbsuser
-
 # It seems that non-root users cannot execute anything from /home/travis
 # so we copy the whole directory for the pbsuser user
 PBSPROUSER_HOME=/home/pbsuser
