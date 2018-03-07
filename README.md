@@ -25,31 +25,21 @@ Testing the PBSpro meadow
 
 The module is continuously tested under the PBSpro version shipped by
 PBSpro themselves in the Docker image [pbspro/pbspro](https://hub.docker.com/r/pbspro/pbspro/)
-(17.1.0 as of September 2017).
+(18.1.0 as of March 2018).
 
 We provide a Docker image
 [ensemblorg/ensembl-hive-pbspro](https://hub.docker.com/r/ensemblorg/ensembl-hive-pbspro/),
 which contains all the dependencies and checkouts.
 
-To build the latter, you first need to edit the `HIVE_PBSPRO_LOCATION` and
-`EHIVE_LOCATION` variables in
-`scripts/docker-ehive-pbspro-test/Dockerfile`.
-The configuration assumes that you have existing checkouts of both
-ensembl-hive and ensembl-hive-pbspro on the host (somewhere under your
-home directory), and shares the host filesystem with the container.
-
-```
-docker run -it ensemblorg/ensembl-hive-pbspro  # run as normal user on your machine. Will start the image as pbsuser
-prove -rv ensembl-hive-pbspro/t                # run as "pbsuser" on the image. Uses sqlite
-```
-
 To test your own version of the code, you can use
-`scripts/ensembl-hive-pbspro/start_test_docker.sh`.
-The scriptwill start a new ``ensemblorg/ensembl-hive-pbspro`` container with
+`scripts/ensembl-hive-pbspro/start_test_docker.sh`,
+but first edit the location of the code you want to test.
+The script will start a new ``ensemblorg/ensembl-hive-pbspro`` container with
 your own copies of ensembl-hive and ensembl-hive-pbspro mounted.
 
 ```
 scripts/ensembl-hive-pbspro/start_test_docker.sh /path/to/your/ensembl-hive /path/to/your/ensembl-hive-pbspro name_of_docker_image
+prove -v '/repo/ensembl-hive/t/04.meadow/meadow-longmult.mt   # in the container
 
 ```
 
