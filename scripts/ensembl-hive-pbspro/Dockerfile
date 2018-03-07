@@ -5,7 +5,11 @@
 FROM pbspro/pbspro
 
 # Install essential things
-RUN yum install -y epel-release sudo git \
+RUN yum install -y epel-release sudo git
+
+# Update the PBS config and create a pbsuser with a home directory and sudo capability
+RUN sed -i 's/^adduser.*/export HOME=~pbsuser/' /entrypoint.sh \
+    && sed -i 's/PBS_START_MOM=0/PBS_START_MOM=1/' /etc/pbs.conf \
     && useradd -r -m -U -G wheel -d /home/pbsuser -s /bin/bash -c "PBSpro user" pbsuser \
     && echo "pbsuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 

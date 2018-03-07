@@ -15,7 +15,5 @@ chown -R pbsuser: $PBSPRO_CHECKOUT_LOCATION
 # Install extra packages inside the container
 $EHIVE_ROOT_DIR/docker/setup_cpan.CentOS-7.sh $PBSPRO_CHECKOUT_LOCATION
 
-$PBSPRO_CHECKOUT_LOCATION/scripts/ensembl-hive-pbspro/start_pbs.sh
-
 sudo -i -u pbsuser $PBSPRO_CHECKOUT_LOCATION/travisci/run_tests.sh
 
