@@ -8,10 +8,9 @@ set -e
 
 echo "DEBUG: Environment of $0"; env; id; echo "END_DEBUG"
 
-BUILD_DIR=/home/pbsuser/ensembl-hive-pbspro
-cd $BUILD_DIR
-export EHIVE_ROOT_DIR=/repo/ensembl-hive
-export PERL5LIB=$EHIVE_ROOT_DIR/modules:$PWD/modules
+REPO_HOME=/repo
+export EHIVE_ROOT_DIR=$REPO_HOME/ensembl-hive
+export PERL5LIB=$EHIVE_ROOT_DIR/modules:$REPO_HOME/ensembl-hive-pbspro/modules
 export EHIVE_TEST_PIPELINE_URLS="sqlite:///$HOME/ehive_test_pipeline_db"
 export EHIVE_MEADOW_TO_TEST=PBSPro
 

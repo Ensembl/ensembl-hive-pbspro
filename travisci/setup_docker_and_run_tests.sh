@@ -7,9 +7,9 @@ echo "DEBUG: Environment of $0"; env; id; echo "END_DEBUG"
 
 # It seems that non-root users cannot execute anything from /home/travis
 # so we copy the whole directory for the pbsuser user
-PBSPROUSER_HOME=/home/pbsuser
-cp -a /home/travis/build/Ensembl/ensembl-hive-pbspro $PBSPROUSER_HOME
-PBSPRO_CHECKOUT_LOCATION=$PBSPROUSER_HOME/ensembl-hive-pbspro
+PBSPRO_CHECKOUT_LOCATION=/repo/ensembl-hive-pbspro
+rm -rf $PBSPRO_CHECKOUT_LOCATION
+cp -a /home/travis/build/Ensembl/ensembl-hive-pbspro $PBSPRO_CHECKOUT_LOCATION
 chown -R pbsuser: $PBSPRO_CHECKOUT_LOCATION
 
 # Install extra packages inside the container
