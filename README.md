@@ -2,7 +2,7 @@
 PBSpro Meadow for eHive
 =======================
 
-[![Build Status](https://travis-ci.org/Ensembl/ensembl-hive-pbspro.svg?branch=master)](https://travis-ci.org/Ensembl/ensembl-hive-pbspro)
+[![Build Status](https://travis-ci.org/Ensembl/ensembl-hive-pbspro.svg?branch=version/2.5)](https://travis-ci.org/Ensembl/ensembl-hive-pbspro)
 
 [eHive](https://github.com/Ensembl/ensembl-hive) is a system for running computation pipelines on distributed computing resources - clusters, farms or grids.
 This repository is the implementation of eHive's _Meadow_ interface for the [PBSpro](https://research.cs.wisc.edu/pbspro/) job scheduler.
