@@ -47,21 +47,30 @@ our $VERSION = '5.1';       # Semantic version of the Meadow interface:
                             #   change the Major version whenever an incompatible change is introduced,
                             #   change the Minor version whenever the interface is extended, but compatibility is retained.
 
+=head2 name
 
-sub name {  # also called to check for availability; assume PBSPro is available if PBSPro server name can be established
+   Args        : None
+   Description : Determine the PBSPro cluster name, if a PBSPro meadow is available
+   Returntype  : String
+
+=cut
+
+sub name {
     my $mcni = 'Server:';
-    my $cmd = "qstat -B -f 2>/dev/null | grep '$mcni'";
-
-#    warn "PBSPro() running cmd:\n\t$cmd\n";
-
-    if(my $name = `$cmd`) {         # note that at least in some installations 'qsub' is not directly runnable on execution nodes (maybe just a PATH issue)
-        $name=~/^$mcni\s+(\S+)/;
-        return $1;
-    } elsif(($ENV{'PBS_JOBID'}//'')=~/^\d+(?:\[\d+\])?\.(\S+)$/) {      # so this is how we check whether we have been submitted under PBSPro
-        return $1;
-    } else {
-        return undef;
+    my @qstat_out = `qstat -B -f 2>/dev/null`;
+    foreach my $qstat_line (@qstat_out) {
+        if ($qstat_line=~/^$mcni\s+(\S+)/) {
+            return $1;
+        }
     }
+
+    # On some installations, 'qsub' is not directly runnable on an execution node, so we can double check
+    # $PBS_JOBID in case qsub does not provide
+    if(($ENV{'PBS_JOBID'}//'')=~/^\d+(?:\[\d+\])?\.(\S+)$/) {
+            return $1;
+    }
+
+    return undef;
 }
 
 
@@ -179,6 +188,14 @@ if(0) {     # The -f (full) format potentially gives more information, but gener
     return \@status_list;
 }
 
+=head2 check_worker_is_alive_and_mine
+
+   Args[1]     : Int $worker. The worker_id of the worker to check
+   Example     : if ($meadow->check_worker_is_alive_and_mine($worker_id)) { do_something_with_worker(); }
+   Description : Returns 1 if the given worker is alive and running in this meadow
+   Returntype  : Boolean
+
+=cut
 
 sub check_worker_is_alive_and_mine {
     my ($self, $worker) = @_;
@@ -187,11 +204,16 @@ sub check_worker_is_alive_and_mine {
     $wpid=~s{\[}{\\[}g;
     $wpid=~s{\]}{\\]}g;
     my $this_user = $ENV{'USER'};
-    my $cmd = qq{qselect -u $this_user -T -s QREX | grep '$wpid'};
+    my $cmd = qq{qselect -u $this_user -T -s QREX};
 
-#    warn "PBSPro::check_worker_is_alive_and_mine() running cmd:\n\t$cmd\n";
+    my @qselect_out = qx/$cmd/;
+    my $is_alive_and_mine = 0;
+    foreach my $qselect_line (@qselect_out) {
+        if ($qselect_line =~ /$wpid/) {
+            $is_alive_and_mine = 1;
+        }
+    }
 
-    my $is_alive_and_mine = qx/$cmd/;
     return $is_alive_and_mine;
 }
 
