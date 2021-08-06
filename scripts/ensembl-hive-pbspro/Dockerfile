@@ -16,7 +16,7 @@ RUN sed -i 's/^adduser.*/export HOME=~pbsuser/' /entrypoint.sh \
 # Clone the repos
 RUN mkdir /repo \
     && git clone -b master https://github.com/Ensembl/ensembl-hive.git /repo/ensembl-hive \
-    && git clone -b master https://github.com/Ensembl/ensembl-hive-pbspro.git /repo/ensembl-hive-pbspro
+    && git clone -b version/2.6 https://github.com/Ensembl/ensembl-hive-pbspro.git /repo/ensembl-hive-pbspro
 
 # Install all the dependencies
 RUN /repo/ensembl-hive/docker/setup_os.CentOS-7.sh \
