@@ -2,6 +2,13 @@
 PBSpro Meadow for eHive
 =======================
 
+> [!IMPORTANT]  
+> As per eHive version 2.7.0, all the meadows other than `SLURM` and `Local` are deprecated and not supported anymore.
+> This repository should remain in sync with eHive's `version/2.6`, as we do not plan to apply any change to it.
+> The `main` branch is expected to go out of sync over time as we apply changes to eHive.
+>
+> Please, do not hesitate to contact us, should this be a problem.
+
 [![Build Status](https://travis-ci.org/Ensembl/ensembl-hive-pbspro.svg?branch=version/2.6)](https://travis-ci.org/Ensembl/ensembl-hive-pbspro)
 
 [eHive](https://github.com/Ensembl/ensembl-hive) is a system for running computation pipelines on distributed computing resources - clusters, farms or grids.
@@ -17,7 +24,7 @@ checkouts are expected to be on the same branch name to function properly.
   branch.
 * `version/2.6` is a stable branch that works with eHive's `version/2.6`
   branch. Both branches are _stable_ and _only_ receive bugfixes.
-* `master` is the development branch and follows eHive's `master`. We
+* `main` is the development branch and follows eHive's `main`. We
   primarily maintain eHive, so both repos may sometimes go out of sync
   until we upgrade the PBSpro module too
 
@@ -60,7 +67,7 @@ Contact us
 ----------
 
 eHive is maintained by the [Ensembl](http://www.ensembl.org/info/about/) project.
-We (Ensembl) are only using Platform LSF to run our computation
+We (Ensembl) are only using SLURM to run our computation
 pipelines, and can only test PBSpro on the Docker image indicated above.
 
 There is eHive users' mailing list for questions, suggestions, discussions and announcements.
